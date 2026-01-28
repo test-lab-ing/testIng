@@ -1,53 +1,49 @@
-name: My Upgraded Robot
-
+name: Auto Create Pull Request and Merge PR
 on:
   push:
-    branches: [ "main", "add-ing2" ]
-  pull_request:
-    branches: [ "main" ]
-
+    branches:
+      - 'add-ing2'
+  
 jobs:
-  learning-job:
+  create-and-merge:
     runs-on: ubuntu-latest
+    permissions: 
+      contents: write
+      pull-requests: write
     steps:
-      - name: 1. ดึงโค้ดมาเตรียมไว้ (ต้องมีเสมอ)
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: 2. ตรวจสอบข้อมูลผู้ใช้งาน
-        run: |
-          echo "คนที่สั่งให้หุ่นยนต์ทำงานคือ: ${{ github.actor }}"
-          echo "เหตุการณ์ที่เกิดขึ้นคือ: ${{ github.event_name }}"
-          echo "กำลังทำงานอยู่ที่กิ่ง: ${{ github.ref }}"
-
-      - name: 3. ลองใช้หุ่นยนต์สร้างไฟล์ใหม่ขึ้นมาเอง
-        run: |
-          echo "หุ่นยนต์กำลังสร้างไฟล์บันทึก..." > robot_log.txt
-          echo "สร้างเสร็จเมื่อเวลา: $(date)" >> robot_log.txt
-          echo "จบการบันทึก" >> robot_log.txt
-
-      - name: 4. ตรวจสอบไฟล์ทั้งหมด (รวมไฟล์ที่หุ่นยนต์เพิ่งสร้าง)
-        run: ls -l
-
-      - name: 5. ให้หุ่นยนต์อ่านข้อความในไฟล์ที่มันสร้างเอง
-        run: cat robot_log.txt
-
-      - name: 6. เช็คเวอร์ชันเครื่องมือในเครื่องหุ่นยนต์ (แถม)
-        run: |
-          node -v
-          python3 --version
-          git --version
-
-      - name: สั่งหุ่นยนต์เปิด Pull Request อัตโนมัติ 
+      # ขั้นตอนที่ 1: สร้าง PR (เหมือนเดิม แต่เพิ่ม id เพื่อเอาเลข PR ไปใช้ต่อ)
+      - name: Create Pull Request
+        id: cpr_step   # <--- ต้องมี ID เพื่อใช้อ้างอิงตอน Merge
         uses: repo-sync/pull-request@v2
         with:
-          source_branch: "${{ github.ref_name }}"
+          source_branch: "add-ing2"
           destination_branch: "main"
-          pr_title: "PR อัตโนมัติจากกิ่ง: ${{ github.ref_name }}"
-          pr_body: "หุ่นยนต์เปิดให้เองครับ"
+          pr_title: "PR: รวมงานจากเครื่องของคุณ"
+          pr_body: "สร้างและรวมร่างอัตโนมัติโดย GitHub Action"
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Merge PR
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # ขั้นตอนตรวจสอบ: เช็คว่ามีของใหม่ไหม?
+      - name: Check for changes
         run: |
-          gh pr merge ${{ github.event.pull_request.number }} --merge --auto
+          if [ -z "${{ steps.cpr_step.outputs.pr_number }}" ]; then
+            echo "⚠️ ไม่พบการเปลี่ยนแปลง (ไฟล์ซ้ำกัน)"
+            echo "จะไม่มีการ Merge เกิดขึ้น"
+          else
+            echo "✅ พบของใหม่! สร้าง PR หมายเลข ${{ steps.cpr_step.outputs.pr_number }} แล้ว"
+          fi
+
+      # ขั้นตอนที่ 2: สั่ง Merge ทันที (นี่คือส่วนที่เพิ่มเข้ามา)
+      - name: Merge Pull Request
+        # บรรทัดนี้คือหัวใจสำคัญ! 
+        # "ถ้า steps.cpr_step มีเลข PR ส่งมา (แปลว่าไม่ซ้ำ) -> ให้ทำ"
+        # "ถ้าไม่มีเลขส่งมา (แปลว่าซ้ำ) -> ให้ข้ามขั้นตอนนี้ไปเลย"
+        if: ${{ steps.cpr_step.outputs.pr_number }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # ใช้รหัสผ่านของระบบ
+        run: |
+          echo "กำลังทำการ Merge PR หมายเลข ${{ steps.cpr_step.outputs.pr_number }}..."
+          # ใช้คำสั่ง gh (GitHub CLI) เพื่อทำการ Merge เข้ากิ่ง main
+          gh pr merge ${{ steps.cpr_step.outputs.pr_number }} --merge --auto
