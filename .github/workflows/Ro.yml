@@ -1,0 +1,28 @@
+name: My First Learning Robot
+
+#สั่งให้หุ่นยนต์ทำงานตอนไหน
+on:
+  push:
+    branches: [ "main", "add-ing2" ] # ทำงานเมื่อมีการ Push เข้ากิ่ง main หรือ add-ing
+  pull_request:
+    branches: [ "main" ]            # ทำงานเมื่อมีคนสร้าง PR เข้าหา main
+
+# กำหนดงานที่หุ่นยนต์ต้องทำ
+jobs:
+  say-hello-job:                    # ชื่อกลุ่มงาน 
+    runs-on: ubuntu-latest          # เลือกใช้คอมจำลอง (Linux) ของ GitHub
+
+    steps:                          # ลำดับขั้นตอนการทำงาน 
+      - name: 1. ดึงโค้ดจากเครื่องเรามาใส่ในเครื่องหุ่นยนต์
+        uses: actions/checkout@v4
+
+      - name: 2. ให้หุ่นยนต์ทักทายคุณ
+        run: echo "สวัสดีครับคุณเจ้าของโปรเจกต์ หุ่นยนต์ Actions พร้อมทำงานแล้ว!"
+
+      - name: 3. ลองเช็คดูว่าหุ่นยนต์มองเห็นไฟล์ที่เราส่งมาไหม
+        run: |
+          echo "รายการไฟล์ในเครื่องตอนนี้คือ:"
+          ls -R
+
+      - name: 4. แสดงเวลาที่หุ่นยนต์ทำงานเสร็จ
+        run: date
