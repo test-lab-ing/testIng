@@ -1,38 +1,28 @@
-name: My Upgraded Robot
+name: My First Learning Robot
 
+#สั่งให้หุ่นยนต์ทำงานตอนไหน
 on:
   push:
-    branches: [ "main", "add-ing2" ]
+    branches: [ "main", "add-ing2" ] # ทำงานเมื่อมีการ Push เข้ากิ่ง main หรือ add-ing
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main" ]            # ทำงานเมื่อมีคนสร้าง PR เข้าหา main
 
+# กำหนดงานที่หุ่นยนต์ต้องทำ
 jobs:
-  learning-job:
-    runs-on: ubuntu-latest
-    steps:
-      - name: 1. ดึงโค้ดมาเตรียมไว้ (ต้องมีเสมอ)
+  say-hello-job:                    # ชื่อกลุ่มงาน 
+    runs-on: ubuntu-latest          # เลือกใช้คอมจำลอง (Linux) ของ GitHub
+
+    steps:                          # ลำดับขั้นตอนการทำงาน 
+      - name: 1. ดึงโค้ดจากเครื่องเรามาใส่ในเครื่องหุ่นยนต์
         uses: actions/checkout@v4
 
-      - name: 2. ตรวจสอบข้อมูลผู้ใช้งาน
+      - name: 2. ให้หุ่นยนต์ทักทายคุณ
+        run: echo "สวัสดีครับคุณเจ้าของโปรเจกต์ หุ่นยนต์ Actions พร้อมทำงานแล้ว!"
+
+      - name: 3. ลองเช็คดูว่าหุ่นยนต์มองเห็นไฟล์ที่เราส่งมาไหม
         run: |
-          echo "คนที่สั่งให้หุ่นยนต์ทำงานคือ: ${{ github.actor }}"
-          echo "เหตุการณ์ที่เกิดขึ้นคือ: ${{ github.event_name }}"
-          echo "กำลังทำงานอยู่ที่กิ่ง: ${{ github.ref }}"
+          echo "รายการไฟล์ในเครื่องตอนนี้คือ:"
+          ls -R
 
-      - name: 3. ลองใช้หุ่นยนต์สร้างไฟล์ใหม่ขึ้นมาเอง
-        run: |
-          echo "หุ่นยนต์กำลังสร้างไฟล์บันทึก...." > robot_log.txt
-          echo "สร้างเสร็จเมื่อเวลา: $(date)" >> robot_log.txt
-          echo "จบการบันทึก" >> robot_log.txt
-
-      - name: 4. ตรวจสอบไฟล์ทั้งหมด (รวมไฟล์ที่หุ่นยนต์เพิ่งสร้าง)
-        run: ls -l
-
-      - name: 5. ให้หุ่นยนต์อ่านข้อความในไฟล์ที่มันสร้างเอง
-        run: cat robot_log.txt
-
-      - name: 6. เช็คเวอร์ชันเครื่องมือในเครื่องหุ่นยนต์ (แถม)
-        run: |
-          node -v
-          python3 --version
-          git --version
+      - name: 4. แสดงเวลาที่หุ่นยนต์ทำงานเสร็จ
+        run: date
