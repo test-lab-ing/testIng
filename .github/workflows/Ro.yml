@@ -19,7 +19,7 @@ jobs:
       - name: 2. สั่งหุ่นยนต์เปิด PR อัตโนมัติ
         uses: repo-sync/pull-request@v2
         with:
-          source_branch: "add-ing"    # กิ่งต้นทาง
+          source_branch: "add-ing2"    # กิ่งต้นทาง
           destination_branch: "main"  # กิ่งปลายทางที่เราอยากรวม
           pr_title: "หุ่นยนต์ส่งงานครับ: ${{ github.event.head_commit.message }}"
           pr_body: "PR นี้ถูกสร้างขึ้นโดยอัตโนมัติจากระบบ GitHub Actions"
