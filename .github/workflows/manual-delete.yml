@@ -1,0 +1,22 @@
+name: "Robot: Manual Delete"
+
+on: 
+  workflow_dispatch:
+    inputs:
+      branches:
+        destination: 'ชื่อที่จะลบ'
+        request: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  Delete-job:
+    run-on: ubuntu-latest
+    steps:
+      - name: 'สั่งลบ'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api -X Delete /repos/${{ GitHub.repository }}/git/refs/heads/${{ GitHub.event.inputs.branches }}
