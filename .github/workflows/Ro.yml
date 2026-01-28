@@ -36,3 +36,12 @@ jobs:
           node -v
           python3 --version
           git --version
+
+      - name: สั่งหุ่นยนต์เปิด PR อัตโนมัติ
+        uses: repo-sync/pull-request@v2
+        with:
+          source_branch: "${{ github.ref_name }}"
+          destination_branch: "main"
+          pr_title: "PR อัตโนมัติจากกิ่ง: ${{ github.ref_name }}"
+          pr_body: "หุ่นยนต์เปิดให้เองครับ"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
