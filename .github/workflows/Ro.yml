@@ -1,26 +1,47 @@
-name: Auto PR Robot
+name: My Upgraded Robot
 
 on:
   push:
-    branches: [ "add-ing3" ] # หุ่นยนต์จะตื่นมาทำงานเฉพาะตอนเรา Push เข้ากิ่งนี้
+    branches: [ "main", "add-ing2" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
-  open-pr:
+  learning-job:
     runs-on: ubuntu-latest
-    # สำคัญ: ต้องให้สิทธิ์หุ่นยนต์ในการเขียน PR ด้วย
-    permissions:
-      contents: write
-      pull-requests: write
-
     steps:
-      - name: 1. เตรียมโค้ด
+      - name: 1. ดึงโค้ดมาเตรียมไว้ (ต้องมีเสมอ)
         uses: actions/checkout@v4
 
-      - name: 2. สั่งหุ่นยนต์เปิด PR อัตโนมัติ
+      - name: 2. ตรวจสอบข้อมูลผู้ใช้งาน
+        run: |
+          echo "คนที่สั่งให้หุ่นยนต์ทำงานคือ: ${{ github.actor }}"
+          echo "เหตุการณ์ที่เกิดขึ้นคือ: ${{ github.event_name }}"
+          echo "กำลังทำงานอยู่ที่กิ่ง: ${{ github.ref }}"
+
+      - name: 3. ลองใช้หุ่นยนต์สร้างไฟล์ใหม่ขึ้นมาเอง
+        run: |
+          echo "หุ่นยนต์กำลังสร้างไฟล์บันทึก..." > robot_log.txt
+          echo "สร้างเสร็จเมื่อเวลา: $(date)" >> robot_log.txt
+          echo "จบการบันทึก" >> robot_log.txt
+
+      - name: 4. ตรวจสอบไฟล์ทั้งหมด (รวมไฟล์ที่หุ่นยนต์เพิ่งสร้าง)
+        run: ls -l
+
+      - name: 5. ให้หุ่นยนต์อ่านข้อความในไฟล์ที่มันสร้างเอง
+        run: cat robot_log.txt
+
+      - name: 6. เช็คเวอร์ชันเครื่องมือในเครื่องหุ่นยนต์ (แถม)
+        run: |
+          node -v
+          python3 --version
+          git --version
+
+      - name: สั่งหุ่นยนต์เปิด PR อัตโนมัติ
         uses: repo-sync/pull-request@v2
         with:
-          source_branch: "add-ing3"    # กิ่งต้นทาง
-          destination_branch: "main"  # กิ่งปลายทางที่เราอยากรวม
-          pr_title: "หุ่นยนต์ส่งงานครับ: ${{ github.event.head_commit.message }}"
-          pr_body: "PR นี้ถูกสร้างขึ้นโดยอัตโนมัติจากระบบ GitHub Actions"
-          github_token: ${{ secrets.GITHUB_TOKEN }} # กุญแจสำคัญที่ให้หุ่นยนต์ทำงานแทนเรา
+          source_branch: "${{ github.ref_name }}"
+          destination_branch: "main"
+          pr_title: "PR อัตโนมัติจากกิ่ง: ${{ github.ref_name }}"
+          pr_body: "หุ่นยนต์เปิดให้เองครับ"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
