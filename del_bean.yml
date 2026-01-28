@@ -1,0 +1,26 @@
+# --- ส่วนที่ 1: ชื่อและเงื่อนไขการทำงาน (Header) ---
+name: "Robot: Manual Delete"
+
+on:
+  workflow_dispatch:      # นี่คือ "หัวใจ" ที่ทำให้เกิดปุ่มกด Manual
+    inputs:               # นี่คือการสร้าง "แบบฟอร์ม" ให้คนกรอก
+      branch_name:        # ชื่อตัวแปรที่เราจะเอาไปใช้ในโค้ด
+        description: 'ชื่อ branches ที่ต้องการจะลบ'
+        required: true    # บังคับว่าต้องกรอก ห้ามว่าง
+        type: string      # รับค่าเป็นข้อความ
+
+# --- ส่วนที่ 2: การตั้งค่าสิทธิ์ (Permissions) ---
+permissions:
+  contents: write         # สำคัญมาก! ถ้าไม่ใส่ บอทจะมีสิทธิ์แค่อ่าน แต่ลบกิ่งไม่ได้
+
+# --- ส่วนที่ 3: งานที่ต้องทำ (Jobs) ---
+jobs:
+  delete-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "สั่งลบ branches"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # ใช้บัตรผ่านของ GitHub
+        run: |
+          # ใช้ GitHub CLI (gh) สั่งงาน
+          gh api -X DELETE /repos/${{ github.repository }}/git/refs/heads/${{ github.event.inputs.branch_name }}
