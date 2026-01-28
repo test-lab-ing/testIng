@@ -32,6 +32,7 @@ jobs:
           body: "จัดการรวมโค้ดให้อัตโนมัติ"
 
       - name: 4. Merge PR ทันที
+        if: steps.cpr.outputs.pull-request-number != ''
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
