@@ -2,12 +2,12 @@ name: "Robot: Auto Delete Branch"
 
 on:
   pull_request:
-    type: [closed]
+    types: [closed]
 
 jobs:
   auto-delete-branch:
     if: github.event.pull_request.merged == true
-    run-on: ubuntu-latest
+    runs-on: ubuntu-latest
     permissions:
       contents: write
 
