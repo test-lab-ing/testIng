@@ -2,32 +2,61 @@ name: "Robot: Auto Delete Branch"
 
 on:
   pull_request:
-    types: [closed]
+    types: [closed] # รันเฉพาะตอน PR ปิดลง
 
 jobs:
-  auto-delete-branch:
-    if: github.event.pull_request.merged == true
-    runs-on: ubuntu-latest
+  delete-branch:
+    if: github.event.pull_request.merged == true # ทำเฉพาะถ้า Merge สำเร็จ
+    runs-on: ubuntu-latest # แก้ไขจุดนี้ที่มีตัว s ด้วยครับ
     permissions:
       contents: write
-
     steps:
-      - name: "1. ตรวจสอบชื่อ branch ที่จะลบ"
-        run: |
-          TARGET="${{ github.event.pull_request.head.ref }}"
-          echo "PR ถูก Merge แล้ว! กำลังเตรียมลบ branch: $TARGET"
-          
-          # ป้องกันไม่ให้ลบกิ่งหลัก (เผื่อไว้)
-          if [ "$TARGET" == "main" ] || [ "$TARGET" == "develop" ]; then
-            echo "ไม่สามารถลบกิ่งหลักได้"
-            exit 1
-          fi
-          echo "target_branch=$TARGET" >> $GITHUB_ENV
-
-
-      - name: "2. สั่งลบ branch อัตโนมัติ"
-        env: 
+      - name: "Delete branch"
+        env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh api -X delete "/repos/${{ github.repository }}/git/refs/heads${{ env.target_branch }}"
-          echo "ลบ branch ${{ env.target_branch }} เรียบร้อย"
+          TARGET="${{ github.event.pull_request.head.ref }}"
+          gh api -X DELETE "/repos/${{ github.repository }}/git/refs/heads/$TARGET"
+
+
+
+
+
+
+
+
+
+
+# name: "Robot: Auto Delete Branch"
+
+# on:
+#   pull_request:
+#     types: [closed]
+
+# jobs:
+#   auto-delete-branch:
+#     if: github.event.pull_request.merged == true
+#     runs-on: ubuntu-latest
+#     permissions:
+#       contents: write
+
+#     steps:
+#       - name: "1. ตรวจสอบชื่อ branch ที่จะลบ"
+#         run: |
+#           TARGET="${{ github.event.pull_request.head.ref }}"
+#           echo "PR ถูก Merge แล้ว! กำลังเตรียมลบ branch: $TARGET"
+          
+#           # ป้องกันไม่ให้ลบกิ่งหลัก (เผื่อไว้)
+#           if [ "$TARGET" == "main" ] || [ "$TARGET" == "develop" ]; then
+#             echo "ไม่สามารถลบกิ่งหลักได้"
+#             exit 1
+#           fi
+#           echo "target_branch=$TARGET" >> $GITHUB_ENV
+
+
+#       - name: "2. สั่งลบ branch อัตโนมัติ"
+#         env: 
+#           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#         run: |
+#           gh api -X delete "/repos/${{ github.repository }}/git/refs/heads${{ env.target_branch }}"
+#           echo "ลบ branch ${{ env.target_branch }} เรียบร้อย"
