@@ -2,24 +2,22 @@ name: "Robot: Auto Delete Branch"
 
 on:
   pull_request:
-    types: [closed] # รันเฉพาะตอน PR ปิดลง
+    types: [closed]
 
 jobs:
   delete-branch:
-    if: github.event.pull_request.merged == true # ทำเฉพาะถ้า Merge สำเร็จ
-    runs-on: ubuntu-latest # แก้ไขจุดนี้ที่มีตัว s ด้วยครับ
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - name: "Delete branch"
+      - name: "1. ลบกิ่งอัตโนมัติ"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TARGET="${{ github.event.pull_request.head.ref }}"
+          echo "กำลังลบกิ่ง: $TARGET"
           gh api -X DELETE "/repos/${{ github.repository }}/git/refs/heads/$TARGET"
-
-
-
 
 
 
