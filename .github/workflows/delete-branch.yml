@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       target_branch:
-        description: 'ระบุชื่อ Branch ที่ต้องการลบ (ระวังอย่าพิมพ์ผิดนะ!)'
+        description: 'ระบุชื่อ Branch ที่ต้องการลบ'
         required: true
         type: string
 
