@@ -24,12 +24,11 @@ jobs:
           fi
           echo "target_branch=$TARGET" >> $GITHUB_ENV
 
-
       - name: "2. สั่งลบ branch อัตโนมัติ"
-        env: 
+        env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh api -X delete "/repos/${{ github.repository }}/git/refs/heads/${{ env.target_branch }}"
+          gh api -X DELETE "/repos/${{ github.repository }}/git/refs/heads/${{ env.target_branch }}"
 
 
 # name: "Robot: Auto Delete Branch"
