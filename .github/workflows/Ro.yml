@@ -48,8 +48,9 @@ jobs:
           # ใช้คำสั่ง gh (GitHub CLI) เพื่อทำการ Merge เข้ากิ่ง main
           gh pr merge ${{ steps.cpr_step.outputs.pr_number }} --merge --auto
 
+# เหมือนให้ไฟล์นี้สามารถโทรหา auto delete เมื่อcreate-and-mergeทำงานเสร็จ
   call-delete-job:
       needs: create-and-merge
       if: success()
-      uses: ./.github/workflows/auto-delete.yml
+      uses: ./.github/workflows/auto-delete.yml # ที่อยู้
       secrets: inherit

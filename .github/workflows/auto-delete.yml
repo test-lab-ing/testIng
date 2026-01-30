@@ -3,11 +3,11 @@ name: "Robot: Auto Delete Branch"
 on:
   pull_request:
     types: [closed]
-  workflow_call:
+  workflow_call: # เพิ่มเข้ามาเหมือนรอให้คนมาโทร เพื่อทำหน้าที่
 
 jobs:
   auto-delete-branch:
-    if: github.event.pull_request.merged == true || github.ref_name != 'main'
+    if: github.event.pull_request.merged == true || github.ref_name != 'main' #และเพิ่มเงื่อนไขอีกว่า หรือถ้า branch ที่กำลังทำงานอยู่ ที่ไม่ใช่ main
     runs-on: ubuntu-latest
     permissions:
       contents: write
