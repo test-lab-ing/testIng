@@ -3,6 +3,7 @@ name: "Robot: Auto Delete Branch"
 on:
   pull_request:
     types: [closed]
+  workflow_call:
 
 jobs:
   auto-delete-branch:
