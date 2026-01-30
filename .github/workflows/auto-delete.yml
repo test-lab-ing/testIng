@@ -29,7 +29,7 @@ jobs:
         env: 
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh api -X delete "/repos/${{ github.repository }}/git/refs/heads${{ env.target_branch }}"
+          gh api -X delete "/repos/${{ github.repository }}/git/refs/heads/${{ env.target_branch }}"
 
 
 # name: "Robot: Auto Delete Branch"
