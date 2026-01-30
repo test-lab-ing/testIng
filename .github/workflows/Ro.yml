@@ -50,6 +50,6 @@ jobs:
 
   call-delete-job:
       needs: create-and-merge
-      if: needs.create-and-merge.result == 'success'
+      if: success()
       uses: ./.github/workflows/auto-delete.yml
       secrets: inherit
