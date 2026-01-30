@@ -7,7 +7,7 @@ on:
 
 jobs:
   auto-delete-branch:
-    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_call'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -15,7 +15,7 @@ jobs:
     steps:
       - name: "1. ตรวจสอบชื่อ branch ที่จะลบ"
         run: |
-          TARGET="${{ github.event.pull_request.head.ref }}"
+          TARGET="${{ github.event.pull_request.head.ref || github.ref_name }}"
           echo "PR ถูก Merge แล้ว! กำลังเตรียมลบ branch: $TARGET"
           
           # ป้องกันไม่ให้ลบกิ่งหลัก (เผื่อไว้)
