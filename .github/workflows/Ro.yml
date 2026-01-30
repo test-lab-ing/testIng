@@ -1,8 +1,8 @@
 name: Auto Create Pull Request and Merge PR
 on:
   push:
-    branches:
-      - 'add-ing2'
+    branches-ignore:
+      - 'main'
   
 jobs:
   create-and-merge:
@@ -19,7 +19,7 @@ jobs:
         id: cpr_step   # <--- ต้องมี ID เพื่อใช้อ้างอิงตอน Merge
         uses: repo-sync/pull-request@v2
         with:
-          source_branch: "add-ing2"
+          source_branch: "${{ github.ref_name }}"
           destination_branch: "main"
           pr_title: "PR: รวมงานจากเครื่องของคุณ"
           pr_body: "สร้างและรวมร่างอัตโนมัติโดย GitHub Action"
