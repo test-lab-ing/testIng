@@ -47,3 +47,9 @@ jobs:
           echo "กำลังทำการ Merge PR หมายเลข ${{ steps.cpr_step.outputs.pr_number }}..."
           # ใช้คำสั่ง gh (GitHub CLI) เพื่อทำการ Merge เข้ากิ่ง main
           gh pr merge ${{ steps.cpr_step.outputs.pr_number }} --merge --auto
+
+  call-delete-job:
+      needs: create-and-merge
+      if: needs.create-and-merge.result == 'success'
+      uses: ./.github/workflows/auto-delete.yml
+      secrets: inherit
