@@ -14,28 +14,27 @@ on:
 jobs:
   test_project_logic:
     runs-on: ubuntu-latest
-    env:
-      GH_TOKEN: ${{ secrets.MY_PROJECT_TOKEN }}
-      # ใช้ตัวแปรกลางของ GitHub เพื่อหาชื่อเจ้าของ Repo อัตโนมัติ
-      REPO: ${{ github.repository }}
-      
     steps:
-      # --- เพิ่มส่วนนี้เข้าไป ---
+      # 1. ต้องมีส่วนนี้เพื่อให้ GitHub รู้จักโฟลเดอร์งาน
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # 2. หาไอดีของ PR (ระบุชื่อ Repo ของคุณลงไปเลยเพื่อความชัวร์)
       - name: Get PR Node ID
         id: get_pr_id
+        env:
+          GH_TOKEN: ${{ secrets.MY_PROJECT_TOKEN }}
         run: |
-          # เพิ่ม --repo $REPO เพื่อระบุว่าต้องไปดูที่คลังเก็บโค้ดไหน
-          PR_NODE_ID=$(gh pr view ${{ github.event.inputs.pr_number }} --repo $REPO --json id -q .id)
+          # ระบุเจ้าของและชื่อ Repo ตรงๆ (ing1403/testing)
+          PR_NODE_ID=$(gh pr view ${{ github.event.inputs.pr_number }} --repo ing1403/testing --json id -q .id)
           echo "PR_ID=$PR_NODE_ID" >> $GITHUB_ENV
           echo "ใช้ PR ID: $PR_NODE_ID"
 
+      # 3. ดึงข้อมูล Project (ใช้ user เพราะเป็นโปรเจกต์ส่วนตัวของคุณ)
       - name: Get Project Data
+        env:
+          GH_TOKEN: ${{ secrets.MY_PROJECT_TOKEN }}
         run: |
-          # เปลี่ยนจาก user เป็น organization ถ้าคุณรันในนามทีม หรือลองใช้ user ตามเดิมถ้าเป็นโปรเจกต์ส่วนตัว
-          # ในที่นี้ผมใช้ชื่อคุณ ing1403 ตามภาพ
           gh api graphql -f query='
             query($user: String!, $number: Int!) {
               user(login: $user){
@@ -51,11 +50,15 @@ jobs:
               }
             }' -f user=ing1403 -F number=${{ github.event.inputs.project_number }} > project_data.json
 
+          # เก็บค่า ID ต่างๆ ลง environment
           echo 'PROJECT_ID='$(jq -r '.data.user.projectV2.id' project_data.json) >> $GITHUB_ENV
           echo 'STATUS_FIELD_ID='$(jq -r '.data.user.projectV2.fields.nodes[] | select(.name== "Status") | .id' project_data.json) >> $GITHUB_ENV
           echo 'TODO_OPTION_ID='$(jq -r '.data.user.projectV2.fields.nodes[] | select(.name== "Status") | .options[] | select(.name=="Todo") |.id' project_data.json) >> $GITHUB_ENV
 
+      # 4. เพิ่ม PR เข้า Project
       - name: Add PR to Project
+        env:
+          GH_TOKEN: ${{ secrets.MY_PROJECT_TOKEN }}
         run: |
           item_id="$( gh api graphql -f query='
             mutation($project:ID!, $pr:ID!) {
@@ -64,8 +67,12 @@ jobs:
               }
             }' -f project=$PROJECT_ID -f pr=$PR_ID --jq '.data.addProjectV2ItemById.item.id')"
           echo 'ITEM_ID='$item_id >> $GITHUB_ENV
+          echo "เพิ่มสำเร็จ ITEM_ID คือ $item_id"
 
+      # 5. เปลี่ยนสถานะเป็น Todo
       - name: Update Status to Todo
+        env:
+          GH_TOKEN: ${{ secrets.MY_PROJECT_TOKEN }}
         run: |
           gh api graphql -f query='
             mutation ($project: ID!, $item: ID!, $status_field: ID!, $status_value: String!) {
@@ -76,3 +83,4 @@ jobs:
                 value: { singleSelectOptionId: $status_value }
               }) { projectV2Item { id } }
             }' -f project=$PROJECT_ID -f item=$ITEM_ID -f status_field=$STATUS_FIELD_ID -f status_value=$TODO_OPTION_ID --silent
+          echo "อัปเดตสถานะเรียบร้อย!"
