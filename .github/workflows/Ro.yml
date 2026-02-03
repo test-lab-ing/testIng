@@ -53,20 +53,30 @@ jobs:
           # ใช้คำสั่ง gh (GitHub CLI) เพื่อทำการ Merge เข้ากิ่ง main
           gh pr merge ${{ steps.cpr_step.outputs.pr_number }} --merge --auto
 
-  # Job 2: อัปเดตสถานะ Project (ใช้ echo)
+  # Job 2: เช็คสถานะ Project (ใช้ echo)
   update_project_status:
     needs: create-and-merge
     if: success()
     runs-on: ubuntu-latest
     steps:
-      - name: Update status via echo
+      - name: Check Project Status and Echo
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PROJECT_NUMBER: 5 
         run: |
-          # ใช้ echo พิมพ์สถานะงาน 
-          echo "✅ การ Merge PR #${{ needs.create-and-merge.outputs.pr_number }} สำเร็จแล้ว"
-          echo "ขั้นตอนถัดไป: กำลังสั่งเปลี่ยนสถานะใน Project เป็น DONE"
+          echo "กำลังเช็คสถานะของ Issue #${{ needs.create-and-merge.outputs.pr_number }}..."
           
-          # ในอนาคตจะใช้คำสั่ง gh project item-edit ตรงนี้
-          echo "Status updated to Done successfully."
+          # ใช้ GitHub CLI ดึงข้อมูล Project ออกมาเป็น JSON 
+          # แล้วใช้ jq กรองเอาเฉพาะ Status ของ Issue ที่เราทำ
+          STATUS=$(gh project item-list $PROJECT_NUMBER --owner ${{ github.repository_owner }} --format json \
+            | jq -r '.items[] | select(.content.number == ${{ needs.create-and-merge.outputs.pr_number }}) | .status')
+
+          # ตรวจสอบค่าที่ได้ แล้ว echo ออกมา
+          if [ -z "$STATUS" ] || [ "$STATUS" == "null" ]; then
+            echo "ไม่พบข้อมูลงานนี้ใน Project Board"
+          else
+            echo "ขณะนี้สถานะของงานบนกระดานคือ [ $STATUS ]"
+          fi
 
   # Job 3: โทรหาไฟล์ลบ Branch
   # เหมือนให้ไฟล์นี้สามารถโทรหา auto delete
