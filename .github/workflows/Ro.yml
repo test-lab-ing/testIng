@@ -53,7 +53,7 @@ jobs:
           # ใช้คำสั่ง gh (GitHub CLI) เพื่อทำการ Merge เข้ากิ่ง main
           gh pr merge ${{ steps.cpr_step.outputs.pr_number }} --merge --auto
 
-  # Job 2: อัปเดตสถานะ Project (ส่วนที่พี่เลี้ยงให้ทำ - ใช้ echo)
+  # Job 2: อัปเดตสถานะ Project (ใช้ echo)
   update_project_status:
     needs: create-and-merge
     if: success()
@@ -61,11 +61,11 @@ jobs:
     steps:
       - name: Update status via echo
         run: |
-          # ใช้ echo พิมพ์สถานะงาน (โจทย์พี่เลี้ยง)
+          # ใช้ echo พิมพ์สถานะงาน 
           echo "✅ การ Merge PR #${{ needs.create-and-merge.outputs.pr_number }} สำเร็จแล้ว"
           echo "ขั้นตอนถัดไป: กำลังสั่งเปลี่ยนสถานะใน Project เป็น DONE"
           
-          # ในอนาคตคุณจะใช้คำสั่ง gh project item-edit ตรงนี้
+          # ในอนาคตจะใช้คำสั่ง gh project item-edit ตรงนี้
           echo "Status updated to Done successfully."
 
   # Job 3: โทรหาไฟล์ลบ Branch
