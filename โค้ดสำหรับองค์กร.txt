@@ -58,25 +58,24 @@ jobs:
     needs: create-and-merge
     if: success()
     runs-on: ubuntu-latest
-    steps:  
+    steps:
       - name: Check Project Status and Echo
         env:
-          # เปลี่ยนจาก GITHUB_TOKEN เป็นชื่อ Secret ใหม่ที่เราสร้าง
-          GH_TOKEN: ${{ secrets.MY_PROJECT_TOKEN }} 
-          PROJECT_NUMBER: 5
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PROJECT_NUMBER: 5 
         run: |
-          # ดึงเลข Issue จาก Job ก่อนหน้ามาใช้ (ตรวจสอบว่าเลขตรงกันไหม)
-          ISSUE_NUM=${{ needs.create-and-merge.outputs.pr_number }}
-          echo "กำลังเช็คสถานะของ Issue #$ISSUE_NUM ใน Project หมายเลข $PROJECT_NUMBER..."
+          echo "กำลังเช็คสถานะของ Issue #${{ needs.create-and-merge.outputs.pr_number }}..."
+          
+          # ใช้ GitHub CLI ดึงข้อมูล Project ออกมาเป็น JSON 
+          # แล้วใช้ jq กรองเอาเฉพาะ Status ของ Issue ที่เราทำ
+          STATUS=$(gh project item-list $PROJECT_NUMBER --owner ${{ github.repository_owner }} --format json \
+            | jq -r '.items[] | select(.content.number == ${{ needs.create-and-merge.outputs.pr_number }}) | .status')
 
-          # ใช้คำสั่งเดิม แต่ระบุ --user ให้ชัดเจนว่าเป็นโปรเจกต์ส่วนตัว
-          STATUS=$(gh project item-list $PROJECT_NUMBER --user "ing1403" --format json \
-            | jq -r ".items[] | select(.content.number == $ISSUE_NUM) | .status")
-
+          # ตรวจสอบค่าที่ได้ แล้ว echo ออกมา
           if [ -z "$STATUS" ] || [ "$STATUS" == "null" ]; then
             echo "ไม่พบข้อมูลงานนี้ใน Project Board"
           else
-            echo "สถานะปัจจุบันของ Issue #$ISSUE_NUM คือ [ $STATUS ]"
+            echo "ขณะนี้สถานะของงานบนกระดานคือ [ $STATUS ]"
           fi
 
   # Job 3: โทรหาไฟล์ลบ Branch
