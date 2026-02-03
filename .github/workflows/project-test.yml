@@ -1,36 +1,41 @@
 name: Manual Add PR to Project (Test)
 
 on:
-  # เลือกใช้ workflow_dispatch เพื่อให้กดรันเองได้จากหน้าเว็บ
   workflow_dispatch:
     inputs:
       pr_number:
-        description: 'เลข PR ที่ต้องการเพิ่มเข้า Project (เช่น 12)'
+        description: 'เลข PR ที่ต้องการเพิ่ม (เช่น 77)'
         required: true
       project_number:
-        description: 'เลข Project (เช่น 5)'
+        description: 'เลข Project (เช่น 1)'
         required: true
-        default: '5'
+        default: '1'
 
 jobs:
   test_project_logic:
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ secrets.MY_PROJECT_TOKEN }}
-      ORG_OR_USER: "ing1403" # แก้เป็นชื่อ User หรือ Org ของคุณ
+      # ใช้ตัวแปรกลางของ GitHub เพื่อหาชื่อเจ้าของ Repo อัตโนมัติ
+      REPO: ${{ github.repository }}
       
     steps:
+      # --- เพิ่มส่วนนี้เข้าไป ---
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Get PR Node ID
         id: get_pr_id
         run: |
-          # แปลงเลข PR (เช่น 12) ให้เป็น Node ID (ยาวๆ) เพื่อใช้กับ GraphQL
-          PR_NODE_ID=$(gh pr view ${{ github.event.inputs.pr_number }} --json id -q .id)
+          # เพิ่ม --repo $REPO เพื่อระบุว่าต้องไปดูที่คลังเก็บโค้ดไหน
+          PR_NODE_ID=$(gh pr view ${{ github.event.inputs.pr_number }} --repo $REPO --json id -q .id)
           echo "PR_ID=$PR_NODE_ID" >> $GITHUB_ENV
           echo "ใช้ PR ID: $PR_NODE_ID"
 
       - name: Get Project Data
         run: |
-          # ดึงข้อมูลโครงสร้าง Project เหมือนโค้ดก่อนหน้านี้
+          # เปลี่ยนจาก user เป็น organization ถ้าคุณรันในนามทีม หรือลองใช้ user ตามเดิมถ้าเป็นโปรเจกต์ส่วนตัว
+          # ในที่นี้ผมใช้ชื่อคุณ ing1403 ตามภาพ
           gh api graphql -f query='
             query($user: String!, $number: Int!) {
               user(login: $user){
@@ -44,9 +49,8 @@ jobs:
                   }
                 }
               }
-            }' -f user=$ORG_OR_USER -F number=${{ github.event.inputs.project_number }} > project_data.json
+            }' -f user=ing1403 -F number=${{ github.event.inputs.project_number }} > project_data.json
 
-          # เก็บ ID สำคัญๆ ลง Environment
           echo 'PROJECT_ID='$(jq -r '.data.user.projectV2.id' project_data.json) >> $GITHUB_ENV
           echo 'STATUS_FIELD_ID='$(jq -r '.data.user.projectV2.fields.nodes[] | select(.name== "Status") | .id' project_data.json) >> $GITHUB_ENV
           echo 'TODO_OPTION_ID='$(jq -r '.data.user.projectV2.fields.nodes[] | select(.name== "Status") | .options[] | select(.name=="Todo") |.id' project_data.json) >> $GITHUB_ENV
@@ -60,7 +64,6 @@ jobs:
               }
             }' -f project=$PROJECT_ID -f pr=$PR_ID --jq '.data.addProjectV2ItemById.item.id')"
           echo 'ITEM_ID='$item_id >> $GITHUB_ENV
-          echo "เพิ่มเข้าโปรเจกต์สำเร็จ ได้ Item ID: $item_id"
 
       - name: Update Status to Todo
         run: |
@@ -73,4 +76,3 @@ jobs:
                 value: { singleSelectOptionId: $status_value }
               }) { projectV2Item { id } }
             }' -f project=$PROJECT_ID -f item=$ITEM_ID -f status_field=$STATUS_FIELD_ID -f status_value=$TODO_OPTION_ID --silent
-          echo "อัปเดตสถานะเป็น Todo เรียบร้อยแล้ว!"
