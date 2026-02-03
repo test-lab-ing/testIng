@@ -40,19 +40,19 @@ jobs:
           fi
 
       # สั่ง Merge ทันที 
-      - name: Merge Pull Request
-        # บรรทัดนี้คือหัวใจสำคัญ! 
-        # "ถ้า steps.cpr_step มีเลข PR ส่งมา (แปลว่าไม่ซ้ำ) -> ให้ทำ"
-        # "ถ้าไม่มีเลขส่งมา (แปลว่าซ้ำ) -> ให้ข้ามขั้นตอนนี้ไปเลย"
-        if: ${{ steps.cpr_step.outputs.pr_number }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "รอสักครู่เพื่อให้ GitHub ตรวจสอบสถานะ PR..."
-          sleep 7
-          echo "กำลังทำการ Merge PR หมายเลข ${{ steps.cpr_step.outputs.pr_number }}..."
-          # ใช้คำสั่ง gh (GitHub CLI) เพื่อทำการ Merge เข้ากิ่ง main
-          gh pr merge ${{ steps.cpr_step.outputs.pr_number }} --merge --auto
+      # - name: Merge Pull Request
+      #   # บรรทัดนี้คือหัวใจสำคัญ! 
+      #   # "ถ้า steps.cpr_step มีเลข PR ส่งมา (แปลว่าไม่ซ้ำ) -> ให้ทำ"
+      #   # "ถ้าไม่มีเลขส่งมา (แปลว่าซ้ำ) -> ให้ข้ามขั้นตอนนี้ไปเลย"
+      #   if: ${{ steps.cpr_step.outputs.pr_number }}
+      #   env:
+      #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   run: |
+      #     echo "รอสักครู่เพื่อให้ GitHub ตรวจสอบสถานะ PR..."
+      #     sleep 7
+      #     echo "กำลังทำการ Merge PR หมายเลข ${{ steps.cpr_step.outputs.pr_number }}..."
+      #     # ใช้คำสั่ง gh (GitHub CLI) เพื่อทำการ Merge เข้ากิ่ง main
+      #     gh pr merge ${{ steps.cpr_step.outputs.pr_number }} --merge --auto
 
   # Job 2: เช็คสถานะ Project (ใช้ echo)
   # update_project_status:
