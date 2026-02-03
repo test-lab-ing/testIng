@@ -82,8 +82,8 @@ jobs:
 
   # Job 3: โทรหาไฟล์ลบ Branch
   # เหมือนให้ไฟล์นี้สามารถโทรหา auto delete
-  call-delete-job:
-    needs: update_project_status # ให้รออัปเดตสถานะเสร็จก่อนค่อยลบ
-    if: success()
-    uses: ./.github/workflows/auto-delete.yml
-    secrets: inherit
+  # call-delete-job:
+  #   needs: update_project_status # ให้รออัปเดตสถานะเสร็จก่อนค่อยลบ
+  #   if: success()
+  #   uses: ./.github/workflows/auto-delete.yml
+  #   secrets: inherit
