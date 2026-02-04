@@ -1,0 +1,55 @@
+name: "Robot: Manual Merge Pull Request"
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'ระบุหมายเลข Pull Request (เช่น 12)'
+        required: true
+        type: number
+
+      merge_method:
+        description: 'วิธี merge'
+        required: true
+        type: choice
+        options:
+          - squash
+          - merge
+          - rebase
+      delete_branch:
+        description: 'ลบสาขาหลังการรวมหรือไม่?'
+        required: true
+        type: choice
+        options:
+          - yes
+          - no
+
+permissions:
+  pull-requests: write
+  contents: write
+
+jobs:
+  manual-merge:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: แสดงข้อมูลคำสั่ง
+        run: |
+          echo "🔧 กำลังจะ merge PR #${{ github.event.inputs.pr_number }}"
+          echo "➡️ วิธี merge: ${{ github.event.inputs.merge_method }}"
+          echo "👤 สั่งโดย: ${{ github.actor }}"
+
+      - name: Merge Pull Request (Manual)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr merge ${{ github.event.inputs.pr_number }} \
+            --${{ github.event.inputs.merge_method }}
+  call-delete-job:
+      needs: manual-merge
+      if: github.event.inputs.delete_branch == 'yes'
+      uses: ./.github/workflows/auto-delete.yml # ที่อยู่
+      secrets: inherit
