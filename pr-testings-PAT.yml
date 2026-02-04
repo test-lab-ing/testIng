@@ -1,0 +1,76 @@
+name: Add PR to project (Code 2 Version)
+
+on:
+  pull_request:
+    types:
+      - ready_for_review
+
+jobs:
+  track_pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get project data
+        env:
+          GH_TOKEN: ${{ secrets.MY_PROJECT_PAT }} # เปลี่ยนชื่อให้ตรงกับ Secret ที่ตั้งไว้
+          ORGANIZATION: "ing1403" # ชอื่ผู้ใช้ github
+          PROJECT_NUMBER: 5
+        run: |
+          gh api graphql -f query='
+            query($org: String!, $number: Int!) {
+              user(login: $org){ # ใช้ user เพราะ ing1403 เป็นบัญชีส่วนตัว
+                projectV2(number: $number) {
+                  id
+                  fields(first:20) {
+                    nodes {
+                      ... on ProjectV2Field { id name }
+                      ... on ProjectV2SingleSelectField {
+                        id name options { id name }
+                      }
+                    }
+                  }
+                }
+              }
+            }' -f org=$ORGANIZATION -F number=$PROJECT_NUMBER > project_data.json
+
+          # สกัด ID ตามโครงสร้างโค้ดที่คุณให้มา
+          echo 'PROJECT_ID='$(jq -r '.data.user.projectV2.id' project_data.json) >> $GITHUB_ENV
+          echo 'DATE_FIELD_ID='$(jq -r '.data.user.projectV2.fields.nodes[] | select(.name== "Date posted") | .id' project_data.json) >> $GITHUB_ENV
+          echo 'STATUS_FIELD_ID='$(jq -r '.data.user.projectV2.fields.nodes[] | select(.name== "Status") | .id' project_data.json) >> $GITHUB_ENV
+          echo 'TODO_OPTION_ID='$(jq -r '.data.user.projectV2.fields.nodes[] | select(.name== "Status") | .options[] | select(.name=="Todo") |.id' project_data.json) >> $GITHUB_ENV
+
+      - name: Add PR to project
+        env:
+          GH_TOKEN: ${{ secrets.YOUR_TOKEN }}
+          PR_ID: ${{ github.event.pull_request.node_id }}
+        run: |
+          item_id="$( gh api graphql -f query='
+            mutation($project:ID!, $pr:ID!) {
+              addProjectV2ItemById(input: {projectId: $project, contentId: $pr}) {
+                item { id }
+              }
+            }' -f project=$PROJECT_ID -f pr=$PR_ID --jq '.data.addProjectV2ItemById.item.id')"
+          echo 'ITEM_ID='$item_id >> $GITHUB_ENV
+
+      - name: Get date
+        run: echo "DATE=$(date +"%Y-%m-%d")" >> $GITHUB_ENV
+
+      - name: Set fields
+        env:
+          GH_TOKEN: ${{ secrets.YOUR_TOKEN }}
+        run: |
+          gh api graphql -f query='
+            mutation (
+              $project: ID!
+              $item: ID!
+              $status_field: ID!
+              $status_value: String!
+              $date_field: ID!
+              $date_value: Date!
+            ) {
+              set_status: updateProjectV2ItemFieldValue(input: {
+                projectId: $project, itemId: $item, fieldId: $status_field, value: { singleSelectOptionId: $status_value }
+              }) { projectV2Item { id } }
+              set_date_posted: updateProjectV2ItemFieldValue(input: {
+                projectId: $project, itemId: $item, fieldId: $date_field, value: { date: $date_value }
+              }) { projectV2Item { id } }
+            }' -f project=$PROJECT_ID -f item=$ITEM_ID -f status_field=$STATUS_FIELD_ID -f status_value=$TODO_OPTION_ID -f date_field=$DATE_FIELD_ID -f date_value=$DATE --silent
