@@ -25,7 +25,6 @@ jobs:
           source_branch: "${{ github.ref_name }}" # ดึงชื่อ Branch มาใช้
           destination_branch: "main"
           pr_title: "PR: พัฒนาฟีเจอร์สำหรับ Issue #${{ github.ref_name }}"
-          # --- แก้ไขตรงนี้ ---
           # ใส่คำว่า closes # แล้วตามด้วยชื่อกิ่ง (ซึ่งเราจะตั้งเป็นตัวเลข)
           pr_body: |
             closes #${{ github.ref_name }}
@@ -100,3 +99,21 @@ jobs:
   #   if: success()
   #   uses: ./.github/workflows/auto-delete.yml
   #   secrets: inherit
+
+
+
+  #ถ้าอยากให้ เป็น auto 100% ต้องแก้ โค้ดส่วน merge ด้วย
+      # - name: Merge Pull Request
+      #   if: ${{ steps.cpr_step.outputs.pr_number }}
+      #   env:
+      #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   run: |
+      #     # 1. สั่ง Merge
+      #     gh pr merge ${{ steps.cpr_step.outputs.pr_number }} --merge --auto
+          
+      #     # 2. รอระบบแป๊บนึง
+      #     sleep 5
+          
+      #     # 3. สั่งปิด Issue ด้วยมือบอท (เพื่อให้การ์ดวาร์ปไป Done)
+      #     # เราใช้ชื่อกิ่ง (github.ref_name) ซึ่งก็คือเลข Issue มาสั่งปิด
+      #     gh issue close ${{ github.ref_name }} --repository ${{ github.repository }}
