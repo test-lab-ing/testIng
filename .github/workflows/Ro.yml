@@ -22,11 +22,25 @@ jobs:
         id: cpr_step
         uses: repo-sync/pull-request@v2
         with:
-          source_branch: "${{ github.ref_name }}"
+          source_branch: "${{ github.ref_name }}" # ดึงชื่อ Branch มาใช้
           destination_branch: "main"
-          pr_title: "PR: รวมงานอัตโนมัติ"
-          pr_body: "สร้างและรวมร่างอัตโนมัติโดย GitHub Action"
+          pr_title: "PR: พัฒนาฟีเจอร์สำหรับ Issue #${{ github.ref_name }}"
+          # --- แก้ไขตรงนี้ ---
+          # ใส่คำว่า closes # แล้วตามด้วยชื่อกิ่ง (ซึ่งเราจะตั้งเป็นตัวเลข)
+          pr_body: |
+            closes #${{ github.ref_name }}
+            สร้างและรวมร่างอัตโนมัติโดย GitHub Action
           github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      # - name: Create Pull Request
+      #   id: cpr_step
+      #   uses: repo-sync/pull-request@v2
+      #   with:
+      #     source_branch: "${{ github.ref_name }}"
+      #     destination_branch: "main"
+      #     pr_title: "PR: รวมงานอัตโนมัติ"
+      #     pr_body: "สร้างและรวมร่างอัตโนมัติโดย GitHub Action"
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
 
       # ขั้นตอนตรวจสอบ: เช็คว่ามีของใหม่ไหม?
       - name: Check for changes

@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.MY_PROJECT_PAT }}
-      PROJECT_OWNER: inging1403
+      PROJECT_OWNER: ing1403
       PROJECT_NUMBER: 5
       ISSUE_NUMBER: ${{ github.event.issue.number }}
     steps:
