@@ -26,7 +26,7 @@ jobs:
           destination_branch: "main"
           pr_title: "PR: รวมงานอัตโนมัติ"
           pr_body: "สร้างและรวมร่างอัตโนมัติโดย GitHub Action"
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.MY_PROJECT_PAT }} # แก้ 
 
       # ขั้นตอนตรวจสอบ: เช็คว่ามีของใหม่ไหม?
       - name: Check for changes
