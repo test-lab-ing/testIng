@@ -4,8 +4,7 @@ on:
   push:
     branches-ignore:
       - 'main'
-      - 'test*'
-      - 'pr*'
+      - 'add*'
 
 jobs:
   # Job 1: สร้าง PR และ Merge 
