@@ -1,0 +1,74 @@
+name: Auto Create Pull Request and Merge PR
+on:
+  push:
+    branches-ignore:
+      - main
+  
+jobs:
+  create-pull-request:
+    runs-on: ubuntu-latest
+    permissions: 
+      contents: write
+      pull-requests: write
+      statuses: write
+    outputs:
+      pr_number: ${{ steps.cpr_step.outputs.pr_number }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install GitHub CLI
+        run: |
+          sudo apt update
+          sudo apt install gh -y
+
+      # [แก้ไขใหม่] แกะแค่ตัวเลขออกมาอย่างเดียว (Clean & Clear)
+      - name: Extract Issue Number
+        id: extract
+        run: |
+          BRANCH_NAME="${{ github.ref_name }}"
+          # หาตัวเลขในชื่อ Branch
+          ISSUE_NUM=$(echo "$BRANCH_NAME" | grep -oE '[0-9]+' | head -n 1)
+          
+          if [ -n "$ISSUE_NUM" ]; then
+            echo "NUM=$ISSUE_NUM" >> $GITHUB_OUTPUT
+            echo "✅ เจอเลข Issue: $ISSUE_NUM"
+          else
+            echo "NUM=" >> $GITHUB_OUTPUT
+            echo "⚠️ ไม่เจอเลข Issue"
+          fi
+
+      # ขั้นตอนที่ 1: สร้าง PR
+      - name: Create Pull Request
+        uses: repo-sync/pull-request@v2
+        with:
+          source_branch: ${{ github.ref_name }}
+          destination_branch: "main"
+          pr_title: "PR: รวมงานจากเครื่องของคุณ #${{ steps.extract.outputs.NUM }}"
+          pr_body: |
+            สร้างและรวมร่างอัตโนมัติโดย GitHub Action 
+            closes #${{ steps.extract.outputs.NUM }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}  
+     
+      # ขั้นตอนตรวจสอบ: เช็คว่ามีของใหม่ไหม?
+      - name: Check for changes
+        run: |
+          if [ -z "${{ steps.cpr_step.outputs.pr_number }}" ]; then
+            echo "⚠️ ไม่พบการเปลี่ยนแปลง (ไฟล์ซ้ำกัน)"
+            echo "จะไม่มีการ Merge เกิดขึ้น"
+          else
+            echo "✅ พบของใหม่! สร้าง PR หมายเลข ${{ steps.cpr_step.outputs.pr_number }} แล้ว"
+          fi
+
+      # # ขั้นตอนที่ 2: สั่ง Merge และลบ Branch ทิ้งทันที 🗑️
+      # - name: Merge Pull Request
+      #   if: ${{ steps.cpr_step.outputs.pr_number }}
+      #   env:
+      #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   run: |
+      #     echo "กำลังทำการ Merge PR หมายเลข ${{ steps.cpr_step.outputs.pr_number }}..."
+          
+      #     # เพิ่ม --delete-branch ต่อท้าย เพื่อสั่งให้ลบกิ่ง oil บน GitHub ทิ้งเมื่อเสร็จงาน
+      #     gh pr merge ${{ steps.cpr_step.outputs.pr_number }} --merge --auto --delete-branch

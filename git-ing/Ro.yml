@@ -115,5 +115,5 @@ jobs:
       #     sleep 5
           
       #     # 3. สั่งปิด Issue ด้วยมือบอท (เพื่อให้การ์ดวาร์ปไป Done)
-      #     # เราใช้ชื่อ branch (github.ref_name) ซึ่งก็คือเลข Issue มาสั่งปิด
+      #     # เราใช้ชื่อกิ่ง (github.ref_name) ซึ่งก็คือเลข Issue มาสั่งปิด
       #     gh issue close ${{ github.ref_name }} --repository ${{ github.repository }}
