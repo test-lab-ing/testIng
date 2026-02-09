@@ -49,30 +49,6 @@ jobs:
           gh pr merge ${{ github.event.inputs.pr_number }} \
             --${{ github.event.inputs.merge_method }}
 
-    #---------------------------------
-      - name: Close Linked Issues Dynamically
-        env:
-          GH_TOKEN: ${{ secrets.MY_PROJECT_PAT }}
-        run: |
-          # 1. หาเลข PR ปัจจุบัน (ดึงจากเลขที่คุณสั่งรัน หรือจากระบบ)
-          PR_NUMBER=${{ github.event.inputs.pr_number }} # หรือเลขที่คุณใช้อ้างอิงในไฟล์เดิม
-
-          echo "🔍 กำลังค้นหา Issue ที่เชื่อมอยู่กับ PR #$PR_NUMBER..."
-
-          # 2. ใช้คำสั่ง gh ส่องดูว่า PR นี้มี "Closing Issue References" เลขอะไรบ้าง
-          # มันจะดึงเลขออกมาได้เอง ไม่ว่าจะมี 1 หรือหลาย Issue ก็ตาม
-          ISSUES=$(gh pr view $PR_NUMBER --json closingIssuesReferences --jq '.closingIssuesReferences[].number')
-
-          if [ -z "$ISSUES" ]; then
-            echo "⚠️ ไม่พบ Issue ที่เชื่อมต่อกับ PR นี้"
-          else
-            for issue in $ISSUES; do
-              echo "🚀 กำลังสั่งปิด Issue #$issue..."
-              gh issue close $issue --repository ${{ github.repository }}
-            done
-            echo "✅ ปิด Issue ทั้งหมดเรียบร้อยแล้ว!"
-          fi
-
   call-delete-job:
       needs: manual-merge
       if: github.event.inputs.delete_branch == 'yes'
