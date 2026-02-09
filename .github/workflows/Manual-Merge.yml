@@ -44,7 +44,7 @@ jobs:
 
       - name: Merge Pull Request (Manual)
         env:
-          GH_TOKEN: ${{ secrets.MY_PROJECT_PAT }}
+          GH_TOKEN: ${{ secrets.GITHUB.TOKEN }}
         run: |
           gh pr merge ${{ github.event.inputs.pr_number }} \
             --${{ github.event.inputs.merge_method }}
