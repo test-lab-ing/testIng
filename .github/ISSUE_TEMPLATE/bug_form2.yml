@@ -3,6 +3,8 @@ description: "ใช้แบบฟอร์มนี้เพื่อแจ้
 title: "[Bug]: "
 labels: ["bug", "triage"]
 projects: ["ing1403/12"]
+assignees: ["ing1403"]
+
 body:
   - type: markdown
     attributes:
