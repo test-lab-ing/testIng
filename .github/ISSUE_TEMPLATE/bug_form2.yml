@@ -2,7 +2,7 @@ name: "🐛 Bug Report (แบบฟอร์ม)"
 description: "ใช้แบบฟอร์มนี้เพื่อแจ้งปัญหาที่พบในโค้ด"
 title: "[Bug]: "
 labels: ["bug", "triage"]
-assignees: ["ing1403/12"]
+Projects: ["ing1403/12"]
 body:
   - type: markdown
     attributes:
