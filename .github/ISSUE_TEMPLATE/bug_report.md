@@ -1,8 +1,8 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-title: รันโค้ดไม่ได้
-labels: bug
+title: ''
+labels: ''
 assignees: ''
 
 ---
@@ -36,3 +36,12 @@ If applicable, add screenshots to help explain your problem.
 
 **Additional context**
 Add any other context about the problem here.
+
+## รายละเอียดบัค
+(เขียนรายละเอียดตรงนี้)
+
+## รายการแก้ไข (Development Tasks)
+<!-- นี่คือส่วนที่เราจะเอาไว้เชื่อมเป็น Sub-issues -->
+- [ ] หาสาเหตุของปัญหา (Root Cause Analysis)
+- [ ] เขียนโค้ดแก้ไข (Bug Fix)
+- [ ] ทดสอบความถูกต้อง (Manual Testing)
