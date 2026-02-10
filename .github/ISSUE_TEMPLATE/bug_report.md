@@ -45,3 +45,4 @@ Add any other context about the problem here.
 - [ ] หาสาเหตุของปัญหา (Root Cause Analysis)
 - [ ] เขียนโค้ดแก้ไข (Bug Fix)
 - [ ] ทดสอบความถูกต้อง (Manual Testing)
+- [ ] ทดสอบความถูกต้อง2 (Manual Testing)
